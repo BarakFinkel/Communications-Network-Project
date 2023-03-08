@@ -46,8 +46,10 @@ def run_dns():
     while True:
 
         print("Waiting for requests...")
-        request = sniff(filter=f'udp and port {dns_port}', count=1, iface=device_name)  # 1 request expected
+        request = sniff(filter=f'udp and port {dns_port} and dst host {dns_ip}', count=1, iface=device_name)  # 1 request expected
         request = request[0]
+
+        time.sleep(1)
 
         req_domain = request[DNS].qd.qname.decode("utf-8")
         req_domain = req_domain[:-1] # The requested domain.
