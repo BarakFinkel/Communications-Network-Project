@@ -39,7 +39,7 @@ def run_dns():
 
     # We create a thread which will run in the background that will check if the domain's TTL has expired.
     # If it has, the domain will be removed from our DNS pool.
-    thread = threading.Thread(target=check_ttl, args=(dns_pool, 'www.myapp.com'))
+    thread = threading.Thread(target=check_ttl, args=(dns_pool, 'www.mysterysong.com'))
     thread.start()
 
     # Now, we begin a loop in which we wait for DNS query requests.
