@@ -6,6 +6,8 @@ from scapy.layers.l2 import Ether
 import datetime
 import threading
 import os
+import socket
+import requests
 
 
 # This function will run in a separate thread and will check if the lease time has expired.
@@ -114,6 +116,57 @@ def find_domain_ip(c_mac, c_ip, c_port, d_ip, d_port, domain):
         return None
 
 
+# This function is for communicating with the mystery_song_server. 
+# The function tries to create a tcp connection with the server, 
+# and if is succussful, so it send an http reqeuset asking the wanted name of song
+# The function then receives the location where the song is. 
+#  
+
+
+def request_song(songname):
+  
+    try:
+        # create TCP socket
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # set a timeout for the connection attempt
+        client_socket.settimeout(4.0)
+        
+        # connect to server
+        client_socket.connect((HOST, server_port))
+
+        # create request with songname
+        request = f"GET /{songname} HTTP/1.1\r\nHost: {HOST}\r\n\r\n"
+
+        # send request to server
+        client_socket.sendall(request.encode())
+
+        # receive response from server - The location of the song
+        response = client_socket.recv(1024)
+        
+        # find the location of the song 
+        response_str = response.decode('utf-8')
+        if 'HTTP/1.1 301' in response_str:
+            location_start = response_str.find('Location: ') + len('Location: ')
+            location_end = response_str.find('\r\n', location_start)
+            location = response_str[location_start:location_end]
+            print(f'Redirect location {location}')
+
+        else:
+            location = None 
+
+
+        # close connection
+        client_socket.close()
+        
+        #return the location 
+        return location
+    
+    except(socket.error, socket.timeout, socket.gaierror, ConnectionRefusedError) as e: 
+        print(f'An error occured: {e}')
+
+
+
 # *** MAIN ***
 
 # First, we ask the client to enter his device's name:
@@ -145,6 +198,30 @@ domain_ip = find_domain_ip(c_mac=client_mac, c_ip=client_ip, c_port=client_port,
 
 # Now, we will connect to the mystery song server:
 server_port = 30197   # The port we will use to communicate with the mystery song server
+HOST = 'localhost'    
+
+# choose genre
+song_genre = input("Enter the genre of the song that you wish to download:  1 - Pop   2 - Classic   3 - Country ")
+
+# choose language
+song_language = input("Enter the language of the song that you want to download:  A - English    B - Spanish  C - Italian ")
+
+# format request
+song_requested = f'{song_genre}-{song_language}'
+
+# send request
+location = request_song(song_requested) 
+
+# found song - go to download it 
+if location:
+    print(f"{location}")
+
+# no such song. try again? 
+else:
+    print("no such song")   
 
 
-# First, we need to create a UDP packet
+
+
+    
+
