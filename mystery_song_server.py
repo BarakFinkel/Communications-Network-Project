@@ -17,38 +17,30 @@ SERVER_PORT = 30197
 
 song_pool = [
 # pop english songs
-{'name': 'song 1', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/bad-habits'},
-{'name': 'song 2', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/shivers'},
-{'name': 'song 3', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/one-more-night'},
-{'name': 'song 4', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/see-you-again'},
-# pop spanish songs
-{'name': 'song 5', 'language': 'B', 'genre': '1', 'url': 'http://10.0.0.100/te-pienso'},
-{'name': 'song 6', 'language': 'B', 'genre': '1', 'url': 'http://10.0.0.100/me-porto-bonito'},
-{'name': 'song 7', 'language': 'B', 'genre': '1', 'url': 'http://10.0.0.100/ilusion'},
-# pop Italian songs 
-{'name': 'song 8', 'language': 'C', 'genre': '1', 'url': 'http://10.0.0.100/italian-pop-1'},
-{'name': 'song 9', 'language': 'C', 'genre': '1', 'url': 'http://10.0.0.100/italian-pop-2'},
-{'name': 'song 10', 'language': 'C', 'genre': '1', 'url': 'http://10.0.0.100/italian-pop-3'},
-# country songs english
-{'name': 'song 11', 'language': 'A', 'genre': '3', 'url': 'http://10.0.0.100/friends-in-low-places'},
-{'name': 'song 12', 'language': 'A', 'genre': '3', 'url': 'http://10.0.0.100/i-walk-the-line'},
-{'name': 'song 13', 'language': 'A', 'genre': '3', 'url': 'http://10.0.0.100/amazed'},
-# country spanish songs
-{'name': 'song 14', 'language': 'B', 'genre': '3', 'url': 'http://10.0.0.100/country-spanish-1'},
-{'name': 'song 15', 'language': 'B', 'genre': '3', 'url': 'http://10.0.0.100/country-spanish-2'},
-{'name': 'song 16', 'language': 'B', 'genre': '3', 'url': 'http://10.0.0.100/country-spanish-3'},
-# country French songs
-{'name': 'song 17', 'language': 'D', 'genre': '3', 'url': 'http://10.0.0.100/french-country-1'},
-{'name': 'song 18', 'language': 'D', 'genre': '3', 'url': 'http://10.0.0.100/french-country-2'},
+{'name': 'song 1', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/ed-sheeran-perfect'},
+{'name': 'song 2', 'language': 'A', 'genre': '1', 'url': 'http://10.0.0.100/lady-gaga-poker-face'},
+# hip hop english songs
+{'name': 'song 3', 'language': 'A', 'genre': '2', 'url': 'http://10.0.0.100/kendrick-lamar-humble'},
+{'name': 'song 4', 'language': 'A', 'genre': '2', 'url': 'http://10.0.0.100/eminem-the-real-slim-shady'},
+# rock english songs 
+{'name': 'song 5', 'language': 'A', 'genre': '3', 'url': 'http://10.0.0.100/beatles-let-it-be'},
+{'name': 'song 6', 'language': 'A', 'genre': '3', 'url': 'http://10.0.0.100/led-zeppelin-immigrant-song'},
+# pop hebrew songs
+{'name': 'song 7', 'language': 'B', 'genre': '1', 'url': 'http://10.0.0.100/noa-kirel-kila'},
+{'name': 'song 8', 'language': 'B', 'genre': '1', 'url': 'http://10.0.0.100/mergui-lo-lihiyot-levad'},
+# hip hop hebrew songs
+{'name': 'song 9', 'language': 'B', 'genre': '2', 'url': 'http://10.0.0.100/tuna-sahara'},
+{'name': 'song 10', 'language': 'B', 'genre': '2', 'url': 'http://10.0.0.100/shachar-seol-bam-bam-bam'},
+# rock hebrew songs 
+{'name': 'song 11', 'language': 'B', 'genre': '3', 'url': 'http://10.0.0.100/kaveret-hora'},
+{'name': 'song 12', 'language': 'B', 'genre': '3', 'url': 'http://10.0.0.100/dudu-tasa-goral'},
+# french pop songs
+{'name': 'song 13', 'language': 'C', 'genre': '1', 'url': 'http://10.0.0.100/stromae-alors-on-danse'},
+# french hip hop songs
+{'name': 'song 14', 'language': 'C', 'genre': '2', 'url': 'http://10.0.0.100/soprano-victory'},
+# italian rock songs
+{'name': 'song 15', 'language': 'D', 'genre': '3', 'url': 'http://10.0.0.100/maneskin-zitti-e-buoni'}
 
-
-# classic spanish songs
-
-# classic Italian songs
-
-# Country english songs 
-
-# Contry Spanish songs
 ]
 
 def handle_client_song_request(client_socket):
@@ -78,7 +70,7 @@ def handle_client_song_request(client_socket):
 
     else:
         print("No songs match the given criteria.")
-        response = b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n".encode()
+        response = b"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"
         client_socket.sendall(response)
 
 
@@ -105,6 +97,26 @@ def start_the_server():
 
             # handle client request in a new thread
             handle_client_song_request(client_socket)
+            
+            continue_listening = ''
+
+            while (continue_listening != 'y' and continue_listening != 'n'):
+                
+                # ask server if to continue listening
+                continue_listening = input("Do you want to continue listening? (y/n): ")
+                
+                if continue_listening == 'n':
+                    song_server_socket.close()
+                    
+                elif continue_listening == 'y':
+                    continue
+                   
+                else:
+                    print("Invalid input. Please enter 'y' or 'n'.")
+
+            if continue_listening == 'n':
+                break
+
 
     except(socket.error, socket.gaierror, OSError, ValueError) as e:
         print(f'Error occurred: {e}')

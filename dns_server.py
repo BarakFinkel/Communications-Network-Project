@@ -34,7 +34,7 @@ def run_dns():
     # This is our DNS pool. It holds all the domains and their associated IP addresses.
     # We initialize it with the domain of the app we created.
     dns_pool = {
-        'www.mysterysong.com': ('10.0.0.12', datetime.datetime.now() + datetime.timedelta(seconds=ttl))
+        'www.mysterysong.com': ('localhost', datetime.datetime.now() + datetime.timedelta(seconds=ttl))
     }
 
     # We create a thread which will run in the background that will check if the domain's TTL has expired.

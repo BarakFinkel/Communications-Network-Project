@@ -9,6 +9,31 @@ from RUDP import RUDP
 window_size = 1
 threshold = 16
 
+# This is a dictionary which holds all the songs we have on our server.
+songs_dictionary = {
+
+'http://10.0.0.100/ed-sheeran-perfect' : 'songs/Ed Sheeran - Perfect.mp3',
+'http://10.0.0.100/lady-gaga-poker-face' : 'songs/Lady Gaga - Poker Face.mp3',
+'http://10.0.0.100/kendrick-lamar-humble' : 'songs/Kendrick Lamar - HUMBLE..mp3',
+'http://10.0.0.100/eminem-the-real-slim-shady' : 'songs/Eminem - The Real Slim Shady.mp3',
+'http://10.0.0.100/beatles-let-it-be' : 'songs/The Beatles - Let It Be.mp3',
+'http://10.0.0.100/led-zeppelin-immigrant-song' : 'songs/Led Zeppelin - Immigrant Song.mp3',
+'http://10.0.0.100/noa-kirel-kila' : 'songs/Noa Kirel - Killer.mp3',
+'http://10.0.0.100/mergui-lo-lihiyot-levad' : 'songs/Mergui - Lo Lihiyot Levad.mp3',
+'http://10.0.0.100/tuna-sahara' : 'songs/Tuna - Sahara.mp3',
+'http://10.0.0.100/shachar-seol-bam-bam-bam' : 'songs/Shachar Seol - Bam Bam Bam.mp3',
+'http://10.0.0.100/kaveret-hora' : 'songs/Kaveret - Hora.mp3',
+'http://10.0.0.100/dudu-tasa-goral' : 'songs/Dudu Tasa - Goral.mp3',
+'http://10.0.0.100/stromae-alors-on-danse': 'songs/Stromae - Alors on Danse.mp3',
+'http://10.0.0.100/soprano-victoire': 'songs/Soprano - Victory.mp3',
+'http://10.0.0.100/maneskin-zitti-e-buoni': 'songs/Maneskin - Zitti E Buoni.mp3'
+
+}
+
+
+
+
+
 
 # This method is responsible for making the initial connection between the client and the server.
 # It does so by sending a SYN packet from the client, and then receiving a SYN-ACK packet from the server.
@@ -81,8 +106,10 @@ def initial_connection(srv_mac, srv_port, srv_ip):
                 if RUDP in clnt_pack and clnt_pack[RUDP].flags == 0x01:
 
                     window_size = clnt_pack[RUDP].wndw_size
+                    song_requested = clnt_pack[Raw].load.decode()
+
                     print("Connection established successfully!")
-                    return clnt_mac, clnt_port, clnt_ip
+                    return clnt_mac, clnt_port, clnt_ip, song_requested
 
                 else:
                     print("Unexpected packet received, aborting...")
@@ -313,16 +340,18 @@ def rudp_server():
     bind_layers(UDP, RUDP)
 
     server_port = 5001
-    server_ip = '10.0.0.21'
+    server_ip = '10.0.0.100'
     server_mac = str(get_if_hwaddr('enp0s3'))
 
     while True:
 
-        client_mac, client_port, client_ip = initial_connection(server_mac, server_port, server_ip)
+        client_mac, client_port, client_ip, requested_song = initial_connection(server_mac, server_port, server_ip)
 
         if client_mac and client_port and client_ip:
 
-            file_chunks = div_file("/home/barakfinkel/Desktop/Tada-sound.mp3")
+            file_name = songs_dictionary[requested_song]
+            file_chunks = div_file(file_name)
+
             send_file(client_mac, server_mac, client_port, server_port, client_ip, server_ip, file_chunks)
 
             end_connection(client_mac, server_mac, client_port, server_port, client_ip, server_ip)
