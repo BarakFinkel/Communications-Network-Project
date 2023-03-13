@@ -339,9 +339,11 @@ def rudp_server():
 
     bind_layers(UDP, RUDP)
 
+    device_name = input("Enter your device's name: ")
+
     server_port = 5001
     server_ip = '10.0.0.100'
-    server_mac = str(get_if_hwaddr('enp0s3'))
+    server_mac = str(get_if_hwaddr(device_name))
 
     while True:
 
