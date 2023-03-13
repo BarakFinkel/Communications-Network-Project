@@ -272,7 +272,7 @@ def send_file(clnt_mac, srv_mac, clnt_port, srv_port, clnt_ip, srv_ip, file_chun
             sendp(chunk_packet, iface='enp0s3')
 
             if start + i != end:
-                time.sleep(0.02) ################
+                time.sleep(0.05) ################
 
             i += 1
 
@@ -281,7 +281,7 @@ def send_file(clnt_mac, srv_mac, clnt_port, srv_port, clnt_ip, srv_ip, file_chun
         print("Finished sending window, waiting for ACK...")
         # We wait for the client to send us an ACK packet for the window we sent.
         clnt_pack = sniff(filter=f"udp and port {srv_port} and host {clnt_ip} ", timeout=10, count=1, iface='enp0s3')
-        time.sleep(0.02)    ################
+        time.sleep(0.05)    ################
 
         # If we received a packet, we set it to be the first packet in the list (the only packet in the list).
         if len(clnt_pack) != 0:
