@@ -423,7 +423,7 @@ def get_file(srv_mac, clnt_mac, srv_port, clnt_port, srv_ip, clnt_ip, requested_
 
                     ack_packet = ether / ip / udp / rudp
 
-                    time.sleep(0.03) #####################
+                    time.sleep(0.04) #####################
 
                     sendp(ack_packet, iface='enp0s3')
 
