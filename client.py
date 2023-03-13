@@ -150,7 +150,6 @@ def request_song(songname, host, srv_port):
             location_start = response_str.find('Location: ') + len('Location: ')
             location_end = response_str.find('\r\n', location_start)
             location = response_str[location_start:location_end]
-            print(f'Redirect location {location}')
 
         else:
             location = None 
@@ -172,11 +171,30 @@ def request_song(songname, host, srv_port):
 # The function then receives the name of the song suggested.
 
 def request_suggestion(host, srv_port):
+    
+    print("-------------------Welcome to MysterySong.com!-------------------")
+    print("")
+    print("Based on very general requests, we will provide you with a song")
+    print("you might like! Hop on and make a request:")
+    print("")
+
     # choose genre
-    song_genre = input("Enter the genre of the song that you wish to download:  1 - Pop   2 - Hip Hop   3 - Rock : ")
+    print("What genre of songs do you like?")
+    print("1) Pop")
+    print("2) Hip Hop")
+    print("3) Rock")
+    song_genre = input("Enter your choice: ")
+
+    print("")
 
     # choose language
-    song_language = input("Enter the language of the song that you want to download:  A - English, B - Hebrew, C - French, D - Italian : ")
+    print("Cool! What language would you like to listen to?")
+    print("A) English")
+    print("B) Hebrew")
+    print("C) French")
+    print("D) Italian")
+    song_language = input("Enter your choice: ")
+    print("")
 
     # format request
     song_requested = f'{song_genre}-{song_language}'
@@ -186,12 +204,17 @@ def request_suggestion(host, srv_port):
 
     # found song - go to download it 
     if location:
+        print("Great! Check the url we sent you for the song.")
+        print("Enjoy!")
+        print("")
         return location
 
     # no such song. try again? 
     else:
+        print("Sorry! No such song is available right now.")
+        print("Hope we can help next time!")
+        print("")
         return None
-        print("no such song")   
 
 
 # This method is responsible for making the initial connection between the client and the server.
@@ -205,7 +228,7 @@ def initial_connection(clnt_mac, srv_port, clnt_port, srv_ip, clnt_ip, song_requ
 
     #
     while window_size < 1 or window_size > 4:
-        window_size = int(input("Please choose a window size for the connection (1-4):"))
+        window_size = int(input("Please choose a window size for the connection ( 1 - 4 ):"))
 
         if window_size < 1 or window_size > 4:
             print("Invalid window size. Please try again.")
@@ -248,8 +271,12 @@ def initial_connection(clnt_mac, srv_port, clnt_port, srv_ip, clnt_ip, song_requ
 
         elif RUDP in srv_pack and srv_pack[RUDP].flags == 0x03:  # 0x03 = SYN-ACK
 
+            
+            # Here, we mark the packet as an ACK packet and also send the window size requested by the client to our server.
             rudp = RUDP(flags=0x01, wndw_size=window_size)  # 0x01 = ACK
-            payload = Raw(load=song_request.encode('utf-8'))
+            
+            # Here, we add the URL that mystery_song_server sent to us to a Raw layer, to be added to our packet.
+            payload = Raw(load=song_request.encode('utf-8'))  
             
             response_packet = ether / ip / udp / rudp / payload
 
@@ -265,17 +292,13 @@ def initial_connection(clnt_mac, srv_port, clnt_port, srv_ip, clnt_ip, song_requ
             return -1
 
 
+# This method receives a url and return the song name at the end of it, 
+# With the first letters of each word capitalized and .mp3 at the end.
 def url_to_song_name(url):
     
-
-    # Split the URL by '/' and take the last part
-    song_name = url.split('/')[-1]
-
-    # Replace '-' with ' ' and add '.mp3' at the end
-    song_name = song_name.replace('-', ' ') + '.mp3'
-
-    # Capitalize the first letter of each word in the song name
-    song_name = ' '.join(word.capitalize() for word in song_name.split())
+    song_name = url.split('/')[-1]   # Saving only what comes after the last '/' character in the url.
+    song_name = song_name.replace('-', ' ')+'.mp3'  # Removing '-' characters with spaces and adding '.mp3' at the end of the string.
+    song_name = ' '.join( word.capitalize() for word in song_name.split() )  # Capitalizing the first letter of each word.
 
     return song_name
 
@@ -400,7 +423,7 @@ def get_file(srv_mac, clnt_mac, srv_port, clnt_port, srv_ip, clnt_ip, requested_
 
                     ack_packet = ether / ip / udp / rudp
 
-                    time.sleep(0.05) #####################
+                    time.sleep(0.03) #####################
 
                     sendp(ack_packet, iface='enp0s3')
 
@@ -504,6 +527,8 @@ client_ip_lease_time = None
 client_ip, client_ip_lease_time, dns_ip = get_ip(c_mac=client_mac, c_port=client_port,
                                                  d_port=dhcp_port, dev_name=device_name)
 
+print("")
+
 # Since we don't know how long the lease time is, we need to start a thread that will check if the lease time has
 # expired. If it has, the whole program will terminate.
 lease_checker = threading.Thread(target=check_lease_time, args=(client_ip_lease_time,))
@@ -513,10 +538,14 @@ lease_checker = lease_checker.start()
 client_port = 20714  # The port we will use to communicate with the DNS server
 dns_port = 53        # The port the DNS server will use to communicate with us
 
+print("")
+
 domain_name = input("Enter a domain name to find it's IP: ")
 
 domain_ip = find_domain_ip(c_mac=client_mac, c_ip=client_ip, c_port=client_port,
                            d_ip=dns_ip, d_port=dns_port, domain=domain_name)
+
+print("")
 
 # Now, we will connect to the mystery song server:
 server_port = 30197   # The port we will use to communicate with the mystery song server
@@ -525,12 +554,15 @@ HOST = domain_ip
 # Using the request suggestion function, we get a redirect location for a song.
 song_location = request_suggestion(HOST, server_port)
 
+# If we failed to get a URL, we exit the program.
+if song_location is None:
+    exit(1)
+
 # Now, we parse the ip address from the location:
 
 parsed_url = urlparse(song_location)
 server_address = parsed_url.hostname
 
-print(server_address)
 server_port = 5001
 client_port = 5000
 
@@ -542,5 +574,3 @@ rudp_client(server_port, client_port, server_address, client_ip, client_mac, son
 
 print("The song is now in your project's directory.")
 print("Thank you for using our service!")
-
-exit(0)

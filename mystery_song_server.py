@@ -44,27 +44,32 @@ song_pool = [
 ]
 
 def handle_client_song_request(client_socket):
-    # receive request from client
+    # Receive request from client
     request = client_socket.recv(1024).decode('utf-8')
     
+    print("Received request! Finding a matching song...")
+
     # Find the name of the song that we want to download
     song_requested = request.split()[1][1:]
 
     # Split to genre and language
     song_genre_langauage = song_requested.split('-')
 
-    # filter the list by genre and language
+    # Filter the list by genre and language
     filtered_songs = [song for song in song_pool if song['genre'] == song_genre_langauage[0]
                        and song['language'] == song_genre_langauage[1]]
     
-    # choose a random song as requested 
+    # Choose a random song as requested 
     if filtered_songs:
         song = random.choice(filtered_songs)
         song_url = song['url']
 
-        # create response with 301 redirect - figure out how to add the song name to path
+        # Create response with 301 redirect - figure out how to add the song name to path
         response = b"HTTP/1.1 301 Moved Permanently\r\nLocation: {songurl}\r\n\r\n" 
         formatted_response = f"{response.decode('utf-8').format(songurl=song_url)}".encode('utf-8')
+
+        print("Match found! Sending song location to the client...")
+
         client_socket.sendall(formatted_response)
 
 
